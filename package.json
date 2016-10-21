@@ -1,0 +1,17 @@
+{
+  "name": "spotify-playlists",
+  "version": "1.0.0",
+  "author": "luismoramedina@gmail.com",
+  "description": "",
+  "main": "server.js",
+
+  "scripts": {
+    "start": "node server.js"
+  },
+
+  "dependencies": {
+    "express": "4.13.4",
+    "request": "*"
+  }
+
+}

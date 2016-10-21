@@ -1,0 +1,6 @@
+= spotify-playlists
+import music to spotify playlist, nodejs, node
+
+export SPOTIFY_USER=...
+export CLIENT_ID=...
+export AUTHORIZATION=Base64(CLIENT_ID:SECRET)

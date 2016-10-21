@@ -1,25 +1,40 @@
 var request = require('request');
 
-exports.search = function(song) {
+exports.search = function(song, authorization, success) {
 
-   console.log("search, " + song);
+   console.log("searching this song: " + song);
+
+   var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + authorization
+   };
 
    var form = {
       q: song,
       type: 'track'
    };
    
-   request.post( {
+   request.get( {
        url: 'https://api.spotify.com/v1/search',
-       body: JSON.stringify(form)},
+       qs: form, headers: headers},
        function (error, response, body) {         
 //         if (!error && response.statusCode == 200) {
          console.log("error: " + error);
          console.log("body: " + body);
-         console.log("response: " + response);
-         var track = JSON.parse(body);
+         console.log("response: " + JSON.stringify(response));
+         var jsonBody = JSON.parse(body);
 
-         success(track.tracks.items[0].uri)
+         if (jsonBody.tracks.items.length > 0) {
+           success({ 
+                      search: song,
+                      hit: jsonBody.tracks.items[0].uri
+                   });
+         } else {
+           success({ 
+                      search: song,
+                      hit: ''
+                   });
+         }
        }
    );
 

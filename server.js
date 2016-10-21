@@ -1,16 +1,23 @@
 var express = require('express');
+var bodyparser = require('body-parser');
+var cookieparser = require('cookie-parser');
 var http = require('http');
 var client = require('./client.js');
 
 var app = express();
+app.use(bodyparser.urlencoded({
+    extended: true, encoding: 'utf8'
+}));
 
-//TODO externalize
-//"37e1b6ffbc714ad68797ea6fe35b43c5"
+app.use(cookieparser());
+
+
 var client_id = process.env.CLIENT_ID;
 var redirect_uri = process.env.CALLBACK || "http%3A%2F%2Flocalhost:8080%2Fcallback";
 var serverPort = process.env.PORT || 8080;
 
 var server = app.listen(serverPort);
+var data = "Mogwai - Hardcore Will Never Die, But You Will - How To Be A Werewolf\nThe Divine Comedy - A Secret History: The Best Of The Divine Comedy - National Express";
 
 console.log("listen on " + redirect_uri);
 
@@ -23,38 +30,47 @@ app.get('/', function (req, res) {
 
 app.get('/textarea', function (req, res) {
    console.time('traces response in ');
-   res.end('<html><body><form action="/songs"><textarea type="text" name="text" id="text">data</textarea><input type="submit" value="Submit"/></form></body></html>');
+   res.end('<html><body><form method="post" action="/songs"><textarea type="text" name="text" id="text">' + data +'</textarea><input type="submit" accept-charset="utf-8" value="Submit"/></form></body></html>');
    console.timeEnd('traces response in ');
 });
 
-app.get('/songs', function (req, res) {
+app.post('/songs', function (req, res) {
    console.time('traces response in ');
    var results = [];
    var onComplete = function() {
-      res.end(results);
+      console.log(results);
+      res.end(JSON.stringify(results));
    };
-   res.end(req.query.text);
-   var songs = req.query.text.split("\n");
+   console.log(">" + req.body.text);
+   var songs = unescape(req.body.text).split("\n");
+   //TODO remove :", beetween () and []
+   console.log("songs: " + songs.length);
    for (var i = 0; i < songs.length; i++) {
-      client.search(songs[i], function (result) {
-         results.push(result);
-         if (results.length == songs.length) {
-            onComplete();
-         }
+      console.log(">>>>>>>>>>" + songs[i]);
+   }
+   for (var i = 0; i < songs.length; i++) {
+      client.search(songs[i], req.cookies.auth, 
+         function (result) {
+            results.push(result);
+            if (results.length == songs.length) {
+               onComplete();
+            }
       });
    }
+
    console.timeEnd('traces response in ');
+});
+
+app.get('/playlist', function (req, res) {
+   client.createPlaylist(process.env.SPOTIFY_USER, "Name", req.headers.cookie.auth);
 });
 
 app.get('/callback', function (req, res) {
    console.time('traces response in ');
    var code = req.query.code;
-   res.end("<html><body>" + code + "</body></html>");
    var token = client.authorize(code, redirect_uri, function (token) {
-      client.createPlaylist(process.env.SPOTIFY_USER, "Name", token);
+      res.writeHead(200, {'Set-Cookie': 'auth=' + token});
+      res.end("<html><body>" + code + "</body></html>");
+      console.timeEnd('traces response in ');
    });
-   //TODO set cookie
-   console.timeEnd('traces response in ');
-
-   
 });

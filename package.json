@@ -10,8 +10,10 @@
   },
 
   "dependencies": {
-    "express": "4.13.4",
-    "request": "*"
+    "express": "*",
+    "request": "*",
+    "body-parser": "*",
+    "cookie-parser": "*"
   }
 
 }

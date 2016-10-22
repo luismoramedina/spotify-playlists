@@ -1,0 +1,19 @@
+html
+  head
+    title!= title
+  body
+     div
+         table(border='1')
+             thead
+                 tr
+                     th Song
+                     th Hit
+             tbody
+                 each result in results
+                     tr
+                         td= result.search
+                         td= result.hit
+      div
+         span Search with no results:
+         br
+         textarea(id='nohit') #{nohit}

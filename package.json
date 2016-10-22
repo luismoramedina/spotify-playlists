@@ -13,7 +13,8 @@
     "express": "*",
     "request": "*",
     "body-parser": "*",
-    "cookie-parser": "*"
+    "cookie-parser": "*",
+    "jade": "*"
   }
 
 }

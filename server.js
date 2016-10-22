@@ -3,8 +3,10 @@ var bodyparser = require('body-parser');
 var cookieparser = require('cookie-parser');
 var http = require('http');
 var client = require('./client.js');
+var jade = require('jade');
 
 var app = express();
+app.set('view engine', 'jade');
 app.use(bodyparser.urlencoded({
     extended: true, encoding: 'utf8'
 }));
@@ -39,7 +41,18 @@ app.post('/songs', function (req, res) {
    var results = [];
    var onComplete = function() {
       console.log(results);
-      res.end(JSON.stringify(results));
+      var nohit = ""
+      for (var i = 0; i < results.length; i++) {
+         var result = results[i]
+         if (result.hit.length == 0) {
+            nohit += result.search + "\n"
+         }
+      }
+      res.render('results', {
+         title: 'Hey',
+         results: results,
+         nohit: nohit
+      });
    };
    console.log(">" + req.body.text);
    var songs = unescape(req.body.text).split("\n");

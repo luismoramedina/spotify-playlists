@@ -75,7 +75,14 @@ app.post('/songs', function (req, res) {
 });
 
 app.get('/playlist', function (req, res) {
-   client.createPlaylist(process.env.SPOTIFY_USER, "Name", req.headers.cookie.auth);
+   var user = process.env.SPOTIFY_USER;
+   client.createPlaylist(user, req.query.playlist, req.cookies.auth, function (playlist_id) {
+         client.add(user, "spotify:track:3LHda8vKJRDhOL6wNtp9XI,spotify:track:4MrwJDlbxpRCdbZWznfbyx", playlist_id, req.cookies.auth, function () {
+            res.end("Ok");
+      }, function (message) {
+         res.end("Error: " + message);
+      })
+   });
 });
 
 app.get('/callback', function (req, res) {

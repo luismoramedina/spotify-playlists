@@ -1,5 +1,40 @@
 var request = require('request');
 
+exports.add = function(user, tracks, playlist_id, authorization, success, error) {
+
+   console.log("adding songs: " + tracks.length);
+
+   if (tracks.length > 100) {
+      error("more than 100 tracks not allowed");
+   }
+
+   var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + authorization
+   };
+
+   tracks = tracks.split(",");
+
+   var form = {
+      uris: tracks
+   };
+
+   console.log(JSON.stringify(form));
+
+   request.post( {
+       url: 'https://api.spotify.com/v1/users/' + user + '/playlists/' + playlist_id + '/tracks',
+       body: JSON.stringify(form),
+       headers: headers} ,
+       function (error, response, body) {
+//         if (!error && response.statusCode == 200) {
+         console.log("error: " + error);
+         console.log("body: " + body);
+         console.log("response: " + response);
+       }
+   );
+
+
+}
 exports.search = function(song, authorization, success) {
 
    console.log("searching this song: " + song);
@@ -40,7 +75,7 @@ exports.search = function(song, authorization, success) {
 
 }
 
-exports.createPlaylist = function(user, name, token) {
+exports.createPlaylist = function(user, name, token, success) {
 
    console.log("createPlaylist, " + name + ", " + token);
 
@@ -64,6 +99,8 @@ exports.createPlaylist = function(user, name, token) {
          console.log("error: " + error);
          console.log("body: " + body);
          console.log("response: " + response);
+
+         success(JSON.parse(body).id);
        }
    );
 

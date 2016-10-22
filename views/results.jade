@@ -3,6 +3,14 @@ html
     title!= title
   body
      div
+         form(method='get', action='playlist')
+            div.input
+               span.label Playlist name:
+               input(type="text", name="playlist", id='playlist')
+            div.actions
+               input(type="submit", value="create playlist")
+
+     div
          table(border='1')
              thead
                  tr

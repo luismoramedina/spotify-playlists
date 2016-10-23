@@ -4,14 +4,17 @@ var cookieparser = require('cookie-parser');
 var http = require('http');
 var client = require('./client.js');
 var jade = require('jade');
+var session = require('express-session')
 
 var app = express();
 app.set('view engine', 'jade');
+app.use(cookieparser());
+//TODO externalize
+app.use(session({secret:'somesecrettokenhere'}));
 app.use(bodyparser.urlencoded({
-    extended: true, encoding: 'utf8'
+   extended: true, encoding: 'utf8'
 }));
 
-app.use(cookieparser());
 
 
 var client_id = process.env.CLIENT_ID;
@@ -48,6 +51,11 @@ app.post('/songs', function (req, res) {
             nohit += result.search + "\n"
          }
       }
+
+      req.session.tracks = results;
+      req.session.num = "3";
+      console.log(req.session.num);
+
       res.render('results', {
          title: 'Hey',
          results: results,
@@ -77,11 +85,21 @@ app.post('/songs', function (req, res) {
 app.get('/playlist', function (req, res) {
    var user = process.env.SPOTIFY_USER;
    client.createPlaylist(user, req.query.playlist, req.cookies.auth, function (playlist_id) {
-         client.add(user, "spotify:track:3LHda8vKJRDhOL6wNtp9XI,spotify:track:4MrwJDlbxpRCdbZWznfbyx", playlist_id, req.cookies.auth, function () {
-            res.end("Ok");
-      }, function (message) {
-         res.end("Error: " + message);
-      })
+
+         var tracks = req.session.tracks;
+
+         var hits = tracks.map(
+            function (track) {
+               return track.hit;
+            }).filter(
+            function (val) {
+               return val.length > 0;
+            }
+         );
+
+         client.add(user, hits, playlist_id, req.cookies.auth,
+            function () { res.end("Ok"); },
+            function (message) { res.end("Error: " + message);})
    });
 });
 

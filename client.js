@@ -2,7 +2,13 @@ var request = require('request');
 
 exports.add = function(user, tracks, playlist_id, authorization, success, error) {
 
-   console.log("adding songs: " + tracks.length);
+  //TODO
+  add100(user, tracks, playlist_id, authorization, success, error);
+}
+
+add100 = function(user, tracks, playlist_id, authorization, success, error) {
+
+   console.log("adding songs: " + tracks);
 
    if (tracks.length > 100) {
       error("more than 100 tracks not allowed");
@@ -12,8 +18,6 @@ exports.add = function(user, tracks, playlist_id, authorization, success, error)
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + authorization
    };
-
-   tracks = tracks.split(",");
 
    var form = {
       uris: tracks
@@ -30,6 +34,7 @@ exports.add = function(user, tracks, playlist_id, authorization, success, error)
          console.log("error: " + error);
          console.log("body: " + body);
          console.log("response: " + response);
+         success();
        }
    );
 
@@ -107,10 +112,10 @@ exports.createPlaylist = function(user, name, token, success) {
 }
 
 exports.authorize = function(code, redirect_uri, success) {
-   console.log("authorize");
    
    //TODO encode
    var authorization = "Basic " + process.env.AUTHORIZATION
+   console.log("authorize: " + authorization);
 
    var headers = {'Authorization': authorization};
    var form = {

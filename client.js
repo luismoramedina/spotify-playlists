@@ -1,9 +1,26 @@
 var request = require('request');
 
 exports.add = function(user, tracks, playlist_id, authorization, success, error) {
+  var size = 100;
+  var chunks = [];
 
-  //TODO
-  add100(user, tracks, playlist_id, authorization, success, error);
+  while (tracks.length > 0) {
+    chunks.push(tracks.splice(0, size));
+  }
+
+  for (var i = 0; i < chunks.length; i++) {
+    var results = 0;
+    var hundredsongs = chunks[i];
+    add100(user, hundredsongs, playlist_id, authorization,
+      function () {
+        results+=1;
+        if (results === i) {
+          success();
+        }
+      }, function () {
+        error();
+      });
+  }
 }
 
 add100 = function(user, tracks, playlist_id, authorization, success, error) {

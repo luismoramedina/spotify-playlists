@@ -1,0 +1,7 @@
+html
+  body
+    div
+      form(method='post', action='/songs')
+         textarea(id='text', name='text', rows='20', cols='100', value='Song list') #{text}
+         br
+         input(type="submit", value="search for songs")

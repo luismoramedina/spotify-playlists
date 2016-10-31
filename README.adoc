@@ -1,6 +1,13 @@
 = spotify-playlists
 import music to spotify playlist, nodejs, node
 
-export SPOTIFY_USER=...
-export CLIENT_ID=...
-export AUTHORIZATION=Base64(CLIENT_ID:SECRET)
+export CLIENT_ID=... (mandatory)
+export SECRET=... (mandatory)
+export AUTHORIZATION=Base64(CLIENT_ID:SECRET) (mandatory)
+export CALLBACK=http...
+export PORT=...
+
+== TODO
+
+. Error handling
+. Make base64 authorization encoding on code

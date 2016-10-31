@@ -3,14 +3,6 @@ html
     title!= title
   body
      div
-         form(method='get', action='playlist')
-            div.input
-               span.label Playlist name:
-               input(type="text", name="playlist", id='playlist')
-            div.actions
-               input(type="submit", value="create playlist")
-
-     div
          table(border='1')
              thead
                  tr
@@ -21,7 +13,13 @@ html
                      tr
                          td= result.search
                          td= result.hit
+                         td= result.song
+
       div
-         span Search with no results:
-         br
-         textarea(id='nohit', name='nohit', rows='20', cols='100') #{nohit}
+      br
+      form(method='get', action='playlist')
+        input(type="text", name="playlist", id='playlist', value='Playlist name')
+        input(type="submit", value="create playlist")
+
+      div
+        h3 If you cannot find some songs, go back and retry the search removing album info, or special characters like ñ,à, etc. or remove parts like these (bla) or [bla]

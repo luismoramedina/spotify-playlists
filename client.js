@@ -40,26 +40,23 @@ add100 = function(user, tracks, playlist_id, authorization, success, error) {
       uris: tracks
    };
 
-   console.log(JSON.stringify(form));
-
    request.post( {
        url: 'https://api.spotify.com/v1/users/' + user + '/playlists/' + playlist_id + '/tracks',
        body: JSON.stringify(form),
        headers: headers} ,
        function (error, response, body) {
-//         if (!error && response.statusCode == 200) {
          console.log("error: " + error);
          console.log("body: " + body);
          console.log("response: " + response);
          success();
        }
    );
-
-
 }
-exports.search = function(song, authorization, success) {
 
-   console.log("searching this song: " + song);
+
+exports.search = function(search, authorization, success, error) {
+
+   console.log("searching this search: " + search);
 
    var headers = {
       'Content-Type': 'application/json',
@@ -67,15 +64,14 @@ exports.search = function(song, authorization, success) {
    };
 
    var form = {
-      q: song,
+      q: search,
       type: 'track'
    };
    
    request.get( {
        url: 'https://api.spotify.com/v1/search',
        qs: form, headers: headers},
-       function (error, response, body) {         
-//         if (!error && response.statusCode == 200) {
+       function (error, response, body) {
          console.log("error: " + error);
          console.log("body: " + body);
          console.log("response: " + JSON.stringify(response));
@@ -83,14 +79,16 @@ exports.search = function(song, authorization, success) {
 
          if (jsonBody.tracks.items.length > 0) {
            success({ 
-                      search: song,
-                      hit: jsonBody.tracks.items[0].uri
-                   });
+              search: search,
+              hit: jsonBody.tracks.items[0].uri,
+              song: jsonBody.tracks.items[0].name
+           });
          } else {
            success({ 
-                      search: song,
-                      hit: ''
-                   });
+              search: search,
+              hit: '',
+              song: '*Not found, go back and try adjusting your search',
+           });
          }
        }
    );
@@ -99,7 +97,7 @@ exports.search = function(song, authorization, success) {
 
 exports.createPlaylist = function(user, name, token, success) {
 
-   console.log("createPlaylist, " + name + ", " + token);
+   console.log("createPlaylist, " + user + ", "  + name);
 
    var authorization = "Bearer " + token;
    var headers = {
@@ -117,7 +115,6 @@ exports.createPlaylist = function(user, name, token, success) {
        body: JSON.stringify(form),
        headers: headers} ,
        function (error, response, body) {
-//         if (!error && response.statusCode == 200) {
          console.log("error: " + error);
          console.log("body: " + body);
          console.log("response: " + response);
@@ -128,11 +125,11 @@ exports.createPlaylist = function(user, name, token, success) {
 
 }
 
-exports.authorize = function(code, redirect_uri, success) {
+exports.authorize = function(code, clientid, secret, redirect_uri, success) {
    
-   //TODO encode
-   var authorization = "Basic " + process.env.AUTHORIZATION
-   console.log("authorize: " + authorization);
+   console.log("authorize");
+   var token = new Buffer(clientid + ":" + secret).toString('base64');
+   var authorization = "Basic " + token;
 
    var headers = {'Authorization': authorization};
    var form = {
@@ -144,12 +141,35 @@ exports.authorize = function(code, redirect_uri, success) {
    request.post( {
        url: 'https://accounts.spotify.com/api/token',
        form: form,
-       headers: headers} ,
+       headers: headers},
        function (error, response, body) {
-//         if (!error && response.statusCode == 200) {
          var jsonres = JSON.parse(body);
          console.log("authorize response: " + jsonres);
          success(jsonres.access_token);
+       }
+   );
+}
+
+
+exports.me = function(authorization, success, error) {
+
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + authorization
+   };
+
+   var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + authorization
+   };
+
+   request.get( {
+       url: 'https://api.spotify.com/v1/me',
+       headers: headers},
+       function (error, response, body) {
+         var jsonres = JSON.parse(body);
+         console.log("authorize response: " + JSON.stringify(jsonres));
+         success(jsonres.id);
        }
    );
 }

@@ -6,44 +6,37 @@ var client = require('./client.js');
 var jade = require('jade');
 var session = require('express-session')
 
+var client_id = process.env.CLIENT_ID;
+var redirect_uri = process.env.CALLBACK || "http%3A%2F%2Flocalhost:8080%2Fcallback";
+var serverPort = process.env.PORT || 8080;
+var secret = process.env.SECRET;
+
 var app = express();
 app.set('view engine', 'jade');
 app.use(cookieparser());
-//TODO externalize
-app.use(session({secret:'somesecrettokenhere'}));
+app.use(session({secret: secret}));
 app.use(bodyparser.urlencoded({
    extended: true, encoding: 'utf8'
 }));
 
 
-
-var client_id = process.env.CLIENT_ID;
-var redirect_uri = process.env.CALLBACK || "http%3A%2F%2Flocalhost:8080%2Fcallback";
-var serverPort = process.env.PORT || 8080;
-
 var server = app.listen(serverPort);
-var data = "Mogwai - Hardcore Will Never Die, But You Will - How To Be A Werewolf\nThe Divine Comedy - A Secret History: The Best Of The Divine Comedy - National Express";
 
-console.log("listen on " + redirect_uri);
+console.log("listen on " + serverPort);
 
 
 app.get('/', function (req, res) {
-   console.time('traces response in ');
    res.redirect("https://accounts.spotify.com/authorize?client_id=" + client_id + "&response_type=code&redirect_uri=" + redirect_uri + "&scope=playlist-modify-private");
-   console.timeEnd('traces response in ');
 });
 
 app.get('/textarea', function (req, res) {
-   console.time('traces response in ');
-   res.end('<html><body><form method="post" action="/songs"><textarea type="text" name="text" id="text">' + data +'</textarea><input type="submit" accept-charset="utf-8" value="Submit"/></form></body></html>');
-   console.timeEnd('traces response in ');
+   res.render('textarea');
 });
 
 app.post('/songs', function (req, res) {
-   console.time('traces response in ');
    var results = [];
    var onComplete = function() {
-      console.log(results);
+/*      console.log(results);
       var nohit = ""
       for (var i = 0; i < results.length; i++) {
          var result = results[i]
@@ -51,26 +44,21 @@ app.post('/songs', function (req, res) {
             nohit += result.search + "\n"
          }
       }
+*/
 
       req.session.tracks = results;
-      req.session.num = "3";
-      console.log(req.session.num);
 
       res.render('results', {
          title: 'Hey',
-         results: results,
-         nohit: nohit
+         results: results
+//         nohit: nohit
       });
    };
-   console.log(">" + req.body.text);
+
    var songs = unescape(req.body.text).split("\n");
-   //TODO remove :", beetween () and []
-   console.log("songs: " + songs.length);
+
    for (var i = 0; i < songs.length; i++) {
-      console.log(">>>>>>>>>>" + songs[i]);
-   }
-   for (var i = 0; i < songs.length; i++) {
-      client.search(songs[i], req.cookies.auth, 
+      client.search(songs[i], req.session.auth_token, 
          function (result) {
             results.push(result);
             if (results.length == songs.length) {
@@ -79,12 +67,12 @@ app.post('/songs', function (req, res) {
       });
    }
 
-   console.timeEnd('traces response in ');
 });
 
 app.get('/playlist', function (req, res) {
-   var user = process.env.SPOTIFY_USER;
-   client.createPlaylist(user, req.query.playlist, req.cookies.auth, function (playlist_id) {
+   var user = req.session.user_id;
+
+   client.createPlaylist(user, req.query.playlist, req.session.auth_token, function (playlist_id) {
 
          var tracks = req.session.tracks;
 
@@ -97,18 +85,27 @@ app.get('/playlist', function (req, res) {
             }
          );
 
-         client.add(user, hits, playlist_id, req.cookies.auth,
-            function () { res.end("Ok"); },
-            function (message) { res.end("Error: " + message);})
+         client.add(user, hits, playlist_id, req.session.auth_token,
+            function () {
+               res.end("Ok");
+            }, function (message) {
+               //TODO send 500
+               res.end("Error: " + message);
+            }
+         );
    });
 });
 
 app.get('/callback', function (req, res) {
-   console.time('traces response in ');
    var code = req.query.code;
-   var token = client.authorize(code, redirect_uri, function (token) {
-      res.writeHead(200, {'Set-Cookie': 'auth=' + token});
-      res.end("<html><body>" + code + "</body></html>");
-      console.timeEnd('traces response in ');
+
+   var token = client.authorize(code, client_id , secret, redirect_uri, 
+      function (token) {
+         req.session.auth_token = token;
+
+         client.me(token, function (userid) {
+            req.session.user_id = userid;
+            res.render("callback");
+         });
    });
 });

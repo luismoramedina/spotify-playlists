@@ -81,7 +81,9 @@ exports.search = function(search, authorization, success, error) {
            success({ 
               search: search,
               hit: jsonBody.tracks.items[0].uri,
-              song: jsonBody.tracks.items[0].name
+              song: jsonBody.tracks.items[0].name,
+              artist: jsonBody.tracks.items[0].artists[0].name,
+              album: jsonBody.tracks.items[0].album.name
            });
          } else {
            success({ 

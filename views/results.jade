@@ -2,24 +2,25 @@ html
   head
     title!= title
   body
+    div
+      h3 NOTE: If you cannot find some songs, go back and retry the search removing album info, or special characters like ñ,à, etc. or remove parts like these (bla) or [bla]
+
+    div
+    br
+    form(method='get', action='playlist')
+      input(type="text", name="playlist", id='playlist', value='Playlist name')
+      input(type="submit", value="create playlist")
+
      div
          table(border='1')
              thead
                  tr
-                     th Song
-                     th Hit
+                     th Search
+                     th Found
              tbody
                  each result in results
                      tr
                          td= result.search
-                         td= result.hit
-                         td= result.song
+                         td
+                           a(href=result.hit)= result.artist + " - " + result.album + " -  " + result.song
 
-      div
-      br
-      form(method='get', action='playlist')
-        input(type="text", name="playlist", id='playlist', value='Playlist name')
-        input(type="submit", value="create playlist")
-
-      div
-        h3 If you cannot find some songs, go back and retry the search removing album info, or special characters like ñ,à, etc. or remove parts like these (bla) or [bla]

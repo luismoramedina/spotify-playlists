@@ -1,11 +1,12 @@
 = spotify-playlists
-import music to spotify playlist, nodejs, node
 
-export CLIENT_ID=... (mandatory)
-export SECRET=... (mandatory)
-export AUTHORIZATION=Base64(CLIENT_ID:SECRET) (mandatory)
-export CALLBACK=http...
-export PORT=...
+import music to spotify playlists, nodejs, node
+
+. export CLIENT_ID=... (mandatory)
+. export SECRET=... (mandatory)
+. export AUTHORIZATION=Base64(CLIENT_ID:SECRET) (mandatory)
+. export CALLBACK=http...
+. export PORT=...
 
 == TODO
 
